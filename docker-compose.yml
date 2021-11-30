@@ -1,0 +1,21 @@
+version: "3.9"  # optional since v1.27.0
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - MONGODB_SERVER=mongodb
+      - MONGODB_DATABASE=admin
+      - "MONGODB_USERNAME=${MONGO_INITDB_ROOT_USERNAME}"
+      - "MONGODB_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}"
+    links:
+      - mongodb
+  mongodb:
+    image: mongo:4
+    environment:
+      - "MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}"
+      - "MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}"
+    volumes:
+      - ./mongodb-data:/data/db
