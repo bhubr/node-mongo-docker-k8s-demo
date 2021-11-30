@@ -12,12 +12,18 @@ const compTmpl = Handlebars.compile(tmpl);
 const app = express();
 app.use(express.urlencoded({ extended: false }))
 
+let conn;
+
 const Cat = mongoose.model('Cat', { name: String });
 
 app.get('/', async (req, res) => {
     const kittensRaw = await Cat.find();
     const kittens = kittensRaw.map(k => k.toObject());
     return res.send(compTmpl({ kittens }));
+});
+
+app.get('/status', async (req, res) => {
+    return res.send({ mongoConnected: !!conn });
 });
 
 app.post('/', async (req, res) => {
@@ -34,8 +40,12 @@ app.post('/', async (req, res) => {
 });
 
 async function bootstrap() {
-    const conn = await mongoose.connect(mongoUri);
-    console.log('mongo connected?', !!conn);
+    try {
+        conn = await mongoose.connect(mongoUri);
+        console.log('mongo connected?', !!conn);
+    } catch (err) {
+        console.error('COULD NOT CONNECT TO MONGODB', err);
+    }
 
     app.listen(port, () => console.log(`listening on ${port}`));
 }

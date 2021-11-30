@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: node-mongo-demo
+  labels:
+    app: node-mongo-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: node-mongo-demo 
+  template:
+    metadata:
+      labels:
+        app: node-mongo-demo
+    spec:
+      containers:
+      - name: node-mongo-demo
+        image: ghcr.io/bhubr/node-mongoose-demo:0.0.4
+        resources:
+          limits:
+            memory: 512Mi
+            cpu: "1"
+        ports:
+        - containerPort: 8081
+        env:
+          - name: PORT
+            value: "8081"
+          - name: MONGODB_DATABASE
+            value: admin
+          - name: MONGODB_USERNAME 
+            valueFrom:
+              secretKeyRef:
+                name: mongodb-secret
+                key: mongo-root-username
+          - name: MONGODB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mongodb-secret
+                key: mongo-root-password
+          - name: MONGODB_SERVER 
+            valueFrom:
+              configMapKeyRef:
+                name: mongodb-configmap
+                key: database-url
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: node-mongo-demo-service
+spec:
+  selector:
+    app: node-mongo-demo
+  type: LoadBalancer
+  ports:
+  - protocol: TCP
+    port: 8081
+    targetPort: 8081
+    nodePort: 30000

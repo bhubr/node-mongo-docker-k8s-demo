@@ -1,3 +1,4 @@
 node_modules
 .env
 mongodb-data
+k8s/mongo-secret.yaml
